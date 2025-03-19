@@ -10,7 +10,7 @@ app = Flask(__name__)  # Ensure `app` is defined
 # GitHub Credentials
 GITHUB_USERNAME = "RayIot-US"
 GITHUB_REPO = "Cloud_CSI"
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_TOKEN = os.getenv("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")  # Set this in your environment
 GITHUB_FILE_PATH = "data.json"
 
 @app.before_request
