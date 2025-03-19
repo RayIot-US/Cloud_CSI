@@ -1,106 +1,124 @@
-from flask import Flask, request, jsonify
-import json
 import requests
-import os
-import base64
-import traceback
 
-app = Flask(__name__)  # Ensure `app` is defined
+def test_github_access():
+    """Test if Render Cloud can access GitHub API with the token"""
+    print("🔍 Testing GitHub API connectivity...")
 
-# GitHub Credentials
-GITHUB_USERNAME = "RayIot-US"
-GITHUB_REPO = "Cloud_CSI"
-GITHUB_TOKEN = os.getenv("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")  # Securely load from environment variable
-GITHUB_FILE_PATH = "csi_data/data.json"  # Stores data in a subfolder
+    headers = {
+        "Authorization": f"token {os.getenv('GITHUB_TOKEN')}",
+        "Accept": "application/vnd.github.v3+json"
+    }
 
-@app.before_request
-def log_request():
-    """Log all incoming requests."""
-    print(f"🔍 Received {request.method} request to {request.path}")
+    response = requests.get("https://api.github.com/user", headers=headers)
 
-def upload_to_github(data):
-    """ Upload CSI data to GitHub as JSON """
-    try:
-        url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPO}/contents/{GITHUB_FILE_PATH}"
-        headers = {
-            "Authorization": f"token {GITHUB_TOKEN}",
-            "Accept": "application/vnd.github.v3+json"
-        }
+    print(f"🔍 GitHub API Test Response: {response.status_code} {response.text}")
 
-        print("🔍 Checking if file exists on GitHub...")
+test_github_access()
 
-        # Get the existing file SHA (needed for updates)
-        response = requests.get(url, headers=headers)
-        sha = None  # Default to None (used when creating a new file)
 
-        if response.status_code == 200:
-            sha = response.json().get("sha", None)
-            print(f"✅ File found, SHA: {sha}")
-        elif response.status_code == 404:
-            print("⚠️ File does not exist, creating a new one.")
-        else:
-            print(f"❌ Error fetching file info from GitHub: {response.text}")
-            return response.status_code
+# from flask import Flask, request, jsonify
+# import json
+# import requests
+# import os
+# import base64
+# import traceback
 
-        # Convert data to JSON format and Base64 encode it
-        json_data = json.dumps(data, indent=4)
-        json_data_b64 = base64.b64encode(json_data.encode()).decode()
+# app = Flask(__name__)  # Ensure `app` is defined
 
-        # Prepare the payload
-        payload = {
-            "message": "Updated CSI data",
-            "content": json_data_b64,  # Use Base64 encoding
-            "sha": sha  # Include SHA to update existing file
-        }
+# # GitHub Credentials
+# GITHUB_USERNAME = "RayIot-US"
+# GITHUB_REPO = "Cloud_CSI"
+# GITHUB_TOKEN = os.getenv("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")  # Securely load from environment variable
+# GITHUB_FILE_PATH = "csi_data/data.json"  # Stores data in a subfolder
 
-        print("📤 Uploading CSI data to GitHub...")
-        response = requests.put(url, headers=headers, json=payload)
+# @app.before_request
+# def log_request():
+#     """Log all incoming requests."""
+#     print(f"🔍 Received {request.method} request to {request.path}")
 
-        if response.status_code in [200, 201]:
-            print("✅ Successfully saved CSI data to GitHub!")
-            return response.status_code
-        else:
-            print(f"❌ Failed to save data to GitHub! Response: {response.text}")
-            return response.status_code
+# def upload_to_github(data):
+#     """ Upload CSI data to GitHub as JSON """
+#     try:
+#         url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPO}/contents/{GITHUB_FILE_PATH}"
+#         headers = {
+#             "Authorization": f"token {GITHUB_TOKEN}",
+#             "Accept": "application/vnd.github.v3+json"
+#         }
 
-    except Exception as e:
-        print(f"🚨 Exception Occurred: {str(e)}")
-        traceback.print_exc()
-        return 500
+#         print("🔍 Checking if file exists on GitHub...")
 
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"status": "success", "message": "Server is running!"}), 200
+#         # Get the existing file SHA (needed for updates)
+#         response = requests.get(url, headers=headers)
+#         sha = None  # Default to None (used when creating a new file)
 
-@app.route("/upload", methods=["POST"])
-def upload():
-    try:
-        print("✅ Received request from ESP32")
-        data = request.json
-        if not data:
-            print("❌ No data received!")
-            return jsonify({"status": "error", "message": "No data received"}), 400
-        print(f"📡 Received Data: {json.dumps(data, indent=4)}")
+#         if response.status_code == 200:
+#             sha = response.json().get("sha", None)
+#             print(f"✅ File found, SHA: {sha}")
+#         elif response.status_code == 404:
+#             print("⚠️ File does not exist, creating a new one.")
+#         else:
+#             print(f"❌ Error fetching file info from GitHub: {response.text}")
+#             return response.status_code
 
-        # Upload data to GitHub
-        status = upload_to_github(data)
+#         # Convert data to JSON format and Base64 encode it
+#         json_data = json.dumps(data, indent=4)
+#         json_data_b64 = base64.b64encode(json_data.encode()).decode()
 
-        if status in [200, 201]:
-            return jsonify({"status": "success", "message": "CSI data saved to GitHub"}), 200
-        else:
-            return jsonify({"status": "error", "message": "Failed to save to GitHub"}), 500
-    except Exception as e:
-        print(f"🚨 Exception Occurred: {str(e)}")
-        traceback.print_exc()
-        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+#         # Prepare the payload
+#         payload = {
+#             "message": "Updated CSI data",
+#             "content": json_data_b64,  # Use Base64 encoding
+#             "sha": sha  # Include SHA to update existing file
+#         }
 
-# ✅ Fix for Gunicorn: Ensure `app` is properly defined
-if __name__ != "__main__":
-    application = app  # Gunicorn looks for `application`
+#         print("📤 Uploading CSI data to GitHub...")
+#         response = requests.put(url, headers=headers, json=payload)
 
-if __name__ == "__main__":
-    print("🚀 Flask Server is Starting...")
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True, use_reloader=False)
+#         if response.status_code in [200, 201]:
+#             print("✅ Successfully saved CSI data to GitHub!")
+#             return response.status_code
+#         else:
+#             print(f"❌ Failed to save data to GitHub! Response: {response.text}")
+#             return response.status_code
+
+#     except Exception as e:
+#         print(f"🚨 Exception Occurred: {str(e)}")
+#         traceback.print_exc()
+#         return 500
+
+# @app.route("/", methods=["GET"])
+# def home():
+#     return jsonify({"status": "success", "message": "Server is running!"}), 200
+
+# @app.route("/upload", methods=["POST"])
+# def upload():
+#     try:
+#         print("✅ Received request from ESP32")
+#         data = request.json
+#         if not data:
+#             print("❌ No data received!")
+#             return jsonify({"status": "error", "message": "No data received"}), 400
+#         print(f"📡 Received Data: {json.dumps(data, indent=4)}")
+
+#         # Upload data to GitHub
+#         status = upload_to_github(data)
+
+#         if status in [200, 201]:
+#             return jsonify({"status": "success", "message": "CSI data saved to GitHub"}), 200
+#         else:
+#             return jsonify({"status": "error", "message": "Failed to save to GitHub"}), 500
+#     except Exception as e:
+#         print(f"🚨 Exception Occurred: {str(e)}")
+#         traceback.print_exc()
+#         return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+
+# # ✅ Fix for Gunicorn: Ensure `app` is properly defined
+# if __name__ != "__main__":
+#     application = app  # Gunicorn looks for `application`
+
+# if __name__ == "__main__":
+#     print("🚀 Flask Server is Starting...")
+#     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True, use_reloader=False)
 
 
 # from flask import Flask, request, jsonify
