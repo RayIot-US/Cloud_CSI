@@ -1,34 +1,64 @@
+import os
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.before_request
-def log_request():
-    print(f"🔍 Received {request.method} request to {request.path}")
-
-@app.route('/', methods=['GET'])
+@app.route("/", methods=["GET"])
 def home():
     return jsonify({"status": "success", "message": "Server is running!"}), 200
 
-@app.route('/upload', methods=['POST'])
+@app.route("/upload", methods=["POST"])
 def upload():
-    """ Receive CSI data from ESP32 """
     try:
         data = request.json
         if not data:
-            print("❌ No data received!")
             return jsonify({"status": "error", "message": "No data received"}), 400
-        
         print(f"📡 Received Data: {data}")
-
-        # Respond to ESP32
         return jsonify({"status": "success", "message": "Data received"}), 200
     except Exception as e:
-        print(f"🚨 Error processing request: {str(e)}")
+        print(f"🚨 Error: {e}")
         return jsonify({"status": "error", "message": "Internal Server Error"}), 500
 
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000)
+if __name__ == "__main__":
+    print("🚀 Flask Server is Starting...")
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True, use_reloader=False)
+
+
+
+
+#working
+
+# from flask import Flask, request, jsonify
+
+# app = Flask(__name__)
+
+# @app.before_request
+# def log_request():
+#     print(f"🔍 Received {request.method} request to {request.path}")
+
+# @app.route('/', methods=['GET'])
+# def home():
+#     return jsonify({"status": "success", "message": "Server is running!"}), 200
+
+# @app.route('/upload', methods=['POST'])
+# def upload():
+#     """ Receive CSI data from ESP32 """
+#     try:
+#         data = request.json
+#         if not data:
+#             print("❌ No data received!")
+#             return jsonify({"status": "error", "message": "No data received"}), 400
+        
+#         print(f"📡 Received Data: {data}")
+
+#         # Respond to ESP32
+#         return jsonify({"status": "success", "message": "Data received"}), 200
+#     except Exception as e:
+#         print(f"🚨 Error processing request: {str(e)}")
+#         return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+
+# if __name__ == '__main__':
+#     app.run(host="0.0.0.0", port=5000)
 
 
 
