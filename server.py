@@ -1,27 +1,75 @@
+from flask import Flask, request, jsonify
+import json
 import requests
+import os
+import base64
+import traceback
 
-def test_github_access():
-    """Test if Render Cloud can access GitHub API"""
-    print("🔍 Testing GitHub API connectivity...")
+app = Flask(__name__)  # Ensure `app` is defined
 
+# GitHub Credentials
+GITHUB_USERNAME = "RayIot-US"
+GITHUB_REPO = "Cloud_CSI"
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_FILE_PATH = "data.json"
+
+@app.before_request
+def log_request():
+    """Log all incoming requests."""
+    print(f"🔍 Received {request.method} request to {request.path}")
+
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"status": "success", "message": "Server is running!"}), 200
+
+@app.route("/upload", methods=["POST"])
+def upload():
     try:
-        response = requests.get("https://api.github.com")
-
-        print(f"🔍 GitHub API Test Response: {response.status_code}")
-
-        if response.status_code == 200:
-            print("✅ GitHub API is reachable!")
-        elif response.status_code == 403:
-            print("❌ GitHub API is blocked! Render Cloud may be restricted.")
-        else:
-            print(f"⚠️ Unexpected Response: {response.text}")
-
+        print("✅ Received request from ESP32")
+        data = request.json
+        if not data:
+            print("❌ No data received!")
+            return jsonify({"status": "error", "message": "No data received"}), 400
+        print(f"📡 Received Data: {json.dumps(data, indent=4)}")
+        return jsonify({"status": "success", "message": "Data received"}), 200
     except Exception as e:
-        print(f"🚨 Error connecting to GitHub: {str(e)}")
+        print(f"🚨 Exception Occurred: {str(e)}")
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
 
-# Run the test
+# ✅ Fix for Gunicorn: Ensure `app` is properly defined
+if __name__ != "__main__":
+    application = app  # Gunicorn looks for `application`
+
 if __name__ == "__main__":
-    test_github_access()
+    print("🚀 Flask Server is Starting...")
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True, use_reloader=False)
+
+
+# import requests
+
+# def test_github_access():
+#     """Test if Render Cloud can access GitHub API"""
+#     print("🔍 Testing GitHub API connectivity...")
+
+#     try:
+#         response = requests.get("https://api.github.com")
+
+#         print(f"🔍 GitHub API Test Response: {response.status_code}")
+
+#         if response.status_code == 200:
+#             print("✅ GitHub API is reachable!")
+#         elif response.status_code == 403:
+#             print("❌ GitHub API is blocked! Render Cloud may be restricted.")
+#         else:
+#             print(f"⚠️ Unexpected Response: {response.text}")
+
+#     except Exception as e:
+#         print(f"🚨 Error connecting to GitHub: {str(e)}")
+
+# # Run the test
+# if __name__ == "__main__":
+#     test_github_access()
 
 
 
