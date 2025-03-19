@@ -7,7 +7,7 @@ app = Flask(__name__)
 GITHUB_USERNAME = "RayIot-US"
 GITHUB_REPO = "Cloud_CSI"
 GITHUB_TOKEN = "your-github-personal-access-token"
-GITHUB_FILE_PATH = "csi_data.json"
+GITHUB_FILE_PATH = "data.json"
 def upload_to_github(data):
     """ Upload CSI data to GitHub as JSON """
     url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPO}/contents/{GITHUB_FILE_PATH}"
