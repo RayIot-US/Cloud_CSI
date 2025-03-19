@@ -1,10 +1,28 @@
 import requests
 
 def test_github_access():
-    response = requests.get("https://api.github.com")
-    print(f"🔍 GitHub API Test Response: {response.status_code} {response.text}")
+    """Test if Render Cloud can access GitHub API"""
+    print("🔍 Testing GitHub API connectivity...")
 
-test_github_access()
+    try:
+        response = requests.get("https://api.github.com")
+
+        print(f"🔍 GitHub API Test Response: {response.status_code}")
+
+        if response.status_code == 200:
+            print("✅ GitHub API is reachable!")
+        elif response.status_code == 403:
+            print("❌ GitHub API is blocked! Render Cloud may be restricted.")
+        else:
+            print(f"⚠️ Unexpected Response: {response.text}")
+
+    except Exception as e:
+        print(f"🚨 Error connecting to GitHub: {str(e)}")
+
+# Run the test
+if __name__ == "__main__":
+    test_github_access()
+
 
 
 
