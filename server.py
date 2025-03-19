@@ -11,7 +11,7 @@ app = Flask(__name__)  # Ensure `app` is defined
 GITHUB_USERNAME = "RayIot-US"
 GITHUB_REPO = "Cloud_CSI"
 GITHUB_TOKEN = os.getenv("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")  # Set this in your environment
-GITHUB_FILE_PATH = "data.json"
+GITHUB_FILE_PATH = "csi_data/data.json"  # Stores data in a subfolder
 
 @app.before_request
 def log_request():
