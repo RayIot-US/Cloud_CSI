@@ -11,7 +11,7 @@ app = Flask(__name__)  # Ensure `app` is defined
 GITHUB_USERNAME = "RayIot-US"
 GITHUB_REPO = "Cloud_CSI"
   # Securely load from Render Cloud environment variable
-#GITHUB_TOKEN = os.getenv("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")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_FILE_PATH = "csi_data/data.json"  # Stores data in a subfolder
 
 @app.before_request
