@@ -3,15 +3,16 @@ import requests
 import json
 import os
 import traceback
-
-app = Flask(__name__)  # Ensure `app` is defined
-
 from flask import Flask, request, jsonify
-import requests
-import os
-import traceback
 
 app = Flask(__name__)  # Ensure `app` is defined
+
+# from flask import Flask, request, jsonify
+# import requests
+# import os
+# import traceback
+
+# app = Flask(__name__)  # Ensure `app` is defined
 
 # GitHub Credentials
 GITHUB_USERNAME = "RayIot-US"
