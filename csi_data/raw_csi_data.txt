@@ -1,9 +1,6 @@
-Timestamp: 00:14:00:534
+Timestamp: 00:17:14:998
 CSI Data: 
 
-Timestamp: 00:14:00:540
-CSI Data: 
-
-Timestamp: 00:14:04:531
+Timestamp: 00:17:18:676
 CSI Data: 
 
