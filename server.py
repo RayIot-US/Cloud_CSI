@@ -70,8 +70,62 @@ def log_request():
 #         traceback.print_exc()
 #         return 500
 
-def upload_to_github(new_raw_data):
-    """ Append new raw CSI text to GitHub file instead of replacing it """
+# def upload_to_github(new_raw_data):
+#     """ Append new raw CSI text to GitHub file instead of replacing it """
+#     try:
+#         url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPO}/contents/{GITHUB_FILE_PATH}"
+#         headers = {
+#             "Authorization": f"token {GITHUB_TOKEN}",
+#             "Accept": "application/vnd.github.v3+json"
+#         }
+
+#         print("🔍 Checking if file exists on GitHub...")
+#         response = requests.get(url, headers=headers)
+#         sha = None
+#         existing_data = ""
+
+#         if response.status_code == 200:
+#             sha = response.json()["sha"]
+#             print(f"✅ File found, SHA: {sha}")
+#             base64_content = response.json()["content"]
+#             existing_data = base64.b64decode(base64_content).decode("utf-8")
+#         elif response.status_code == 404:
+#             print("⚠️ File not found, will create new one.")
+#         else:
+#             print(f"❌ Error reading from GitHub: {response.status_code}")
+#             return response.status_code
+
+#         # Append new data to existing content
+#         combined_data = existing_data.strip() + "\n\n" + new_raw_data.strip()
+
+#         # Encode the full text
+#         encoded = base64.b64encode(combined_data.encode("utf-8")).decode("utf-8")
+
+#         payload = {
+#             "message": "Append CSI data",
+#             "content": encoded,
+#             "sha": sha if sha else None
+#         }
+
+#         print("📤 Uploading updated file...")
+#         put_response = requests.put(url, headers=headers, json=payload)
+#         print(f"🔁 GitHub Response: {put_response.status_code}")
+#         print(put_response.text)
+
+#         if put_response.status_code in [200, 201]:
+#             print("✅ Raw CSI appended to GitHub successfully.")
+#             return 200
+#         else:
+#             print("❌ GitHub PUT failed.")
+#             return put_response.status_code
+
+#     except Exception as e:
+#         print(f"🚨 Exception occurred: {str(e)}")
+#         traceback.print_exc()
+#         return 500
+
+def upload_to_github(new_json_data):
+    """ Parse CSI JSON, format it as line-by-line raw text, and append to GitHub file """
     try:
         url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPO}/contents/{GITHUB_FILE_PATH}"
         headers = {
@@ -79,45 +133,50 @@ def upload_to_github(new_raw_data):
             "Accept": "application/vnd.github.v3+json"
         }
 
-        print("🔍 Checking if file exists on GitHub...")
+        # Get existing content
         response = requests.get(url, headers=headers)
         sha = None
         existing_data = ""
 
         if response.status_code == 200:
             sha = response.json()["sha"]
-            print(f"✅ File found, SHA: {sha}")
-            base64_content = response.json()["content"]
-            existing_data = base64.b64decode(base64_content).decode("utf-8")
+            existing_base64 = response.json()["content"]
+            existing_data = base64.b64decode(existing_base64).decode("utf-8")
+            print(f"✅ Existing file found. Appending...")
         elif response.status_code == 404:
-            print("⚠️ File not found, will create new one.")
+            print("📁 No file found. A new one will be created.")
         else:
-            print(f"❌ Error reading from GitHub: {response.status_code}")
+            print(f"❌ Error fetching file: {response.status_code}")
             return response.status_code
 
-        # Append new data to existing content
-        combined_data = existing_data.strip() + "\n\n" + new_raw_data.strip()
+        # Parse incoming JSON string into Python dict
+        parsed = json.loads(new_json_data)
+        csi_entries = parsed.get("csi_data", [])
 
-        # Encode the full text
-        encoded = base64.b64encode(combined_data.encode("utf-8")).decode("utf-8")
+        # Format each entry as "Timestamp + CSI Data"
+        new_text = ""
+        for entry in csi_entries:
+            timestamp = entry.get("timestamp", "unknown")
+            values = entry.get("csi_values", [])
+            values_str = " ".join(map(str, values))
+            new_text += f"Timestamp: {timestamp}\nCSI Data: {values_str}\n\n"
 
+        # Append to existing data
+        combined_data = existing_data.strip() + "\n" + new_text.strip()
+        encoded_content = base64.b64encode(combined_data.encode()).decode()
+
+        # Push back to GitHub
         payload = {
-            "message": "Append CSI data",
-            "content": encoded,
+            "message": "Append formatted CSI data",
+            "content": encoded_content,
             "sha": sha if sha else None
         }
 
-        print("📤 Uploading updated file...")
         put_response = requests.put(url, headers=headers, json=payload)
         print(f"🔁 GitHub Response: {put_response.status_code}")
         print(put_response.text)
 
-        if put_response.status_code in [200, 201]:
-            print("✅ Raw CSI appended to GitHub successfully.")
-            return 200
-        else:
-            print("❌ GitHub PUT failed.")
-            return put_response.status_code
+        return put_response.status_code
 
     except Exception as e:
         print(f"🚨 Exception occurred: {str(e)}")
