@@ -1,34 +1,24 @@
-
-
-import base64  # 🔴 Add this line
+import base64
 import requests
 import json
 import os
 import traceback
 from flask import Flask, request, jsonify
 
-app = Flask(__name__)  # Ensure `app` is defined
-
-# from flask import Flask, request, jsonify
-# import requests
-# import os
-# import traceback
-
-# app = Flask(__name__)  # Ensure `app` is defined
+app = Flask(__name__)
 
 # GitHub Credentials
 GITHUB_USERNAME = "RayIot-US"
 GITHUB_REPO = "Cloud_CSI"
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")  # Securely load from Render Cloud environment variable
-GITHUB_FILE_PATH = "csi_data/raw_csi_data.txt"  # Save as raw text
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_FILE_PATH = "csi_data/raw_csi_data.txt"
 
 @app.before_request
 def log_request():
-    """Log all incoming requests."""
     print(f"🔍 Received {request.method} request to {request.path}")
 
-def upload_to_github(raw_data):
-    """ Upload CSI data to GitHub as RAW text """
+def upload_to_github(new_raw_data):
+    """ Append CSI data to GitHub file instead of replacing it """
     try:
         url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPO}/contents/{GITHUB_FILE_PATH}"
         headers = {
@@ -37,41 +27,43 @@ def upload_to_github(raw_data):
         }
 
         print("🔍 Checking if file exists on GitHub...")
-
-        # Get the existing file SHA (needed for updates)
         response = requests.get(url, headers=headers)
-        sha = None  
+        sha = None
+        existing_data = ""
 
         if response.status_code == 200:
-            sha = response.json().get("sha", None)
+            sha = response.json()["sha"]
             print(f"✅ File found, SHA: {sha}")
+            existing_base64 = response.json()["content"]
+            existing_data = base64.b64decode(existing_base64).decode("utf-8")
         elif response.status_code == 404:
-            print("⚠️ File does not exist, creating a new one.")
+            print("⚠️ File does not exist. A new file will be created.")
         else:
-            print(f"❌ Error fetching file info from GitHub: {response.text}")
+            print(f"❌ Error fetching file: {response.status_code} {response.text}")
             return response.status_code
 
-        # Convert data to Base64 (GitHub requires it for text files)
-        raw_data_b64 = base64.b64encode(raw_data.encode()).decode()
+        # Append new data to existing data
+        combined_data = existing_data + "\n" + new_raw_data
 
-        # Prepare the payload
+        encoded_data = base64.b64encode(combined_data.encode()).decode()
+
         payload = {
-            "message": "Updated RAW CSI data",
-            "content": raw_data_b64,  
-            "sha": sha if sha else None  
+            "message": "Appended new CSI data",
+            "content": encoded_data,
+            "sha": sha if sha else None
         }
 
-        print("📤 Uploading RAW CSI data to GitHub...")
-        response = requests.put(url, headers=headers, json=payload)
+        print("📤 Uploading updated file to GitHub...")
+        put_response = requests.put(url, headers=headers, json=payload)
+        print(f"🔁 GitHub PUT Response: {put_response.status_code}")
+        print(put_response.text)
 
-        print(f"🔍 GitHub API Response: {response.status_code} {response.text}")
-
-        if response.status_code in [200, 201]:
-            print("✅ Successfully saved RAW CSI data to GitHub!")
-            return response.status_code
+        if put_response.status_code in [200, 201]:
+            print("✅ Data appended to GitHub.")
+            return 200
         else:
-            print(f"❌ Failed to save data to GitHub! Response: {response.text}")
-            return response.status_code
+            print("❌ Failed to update GitHub file.")
+            return put_response.status_code
 
     except Exception as e:
         print(f"🚨 Exception Occurred: {str(e)}")
@@ -86,17 +78,16 @@ def home():
 def upload():
     try:
         print("✅ Received request from ESP32")
-        raw_data = request.data.decode("utf-8")  # Read raw text
+        raw_data = request.data.decode("utf-8")
         if not raw_data:
             print("❌ No data received!")
             return jsonify({"status": "error", "message": "No data received"}), 400
         print(f"📡 Received RAW Data:\n{raw_data}")
 
-        # Upload raw data to GitHub
         status = upload_to_github(raw_data)
 
         if status in [200, 201]:
-            return jsonify({"status": "success", "message": "RAW CSI data saved to GitHub"}), 200
+            return jsonify({"status": "success", "message": "RAW CSI data appended to GitHub"}), 200
         else:
             return jsonify({"status": "error", "message": "Failed to save to GitHub"}), 500
     except Exception as e:
@@ -104,13 +95,128 @@ def upload():
         traceback.print_exc()
         return jsonify({"status": "error", "message": "Internal Server Error"}), 500
 
-# ✅ Fix for Gunicorn: Ensure `app` is properly defined
+# Gunicorn compatibility
 if __name__ != "__main__":
-    application = app  # Gunicorn looks for `application`
+    application = app
 
 if __name__ == "__main__":
     print("🚀 Flask Server is Starting...")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True, use_reloader=False)
+
+
+
+#working latest
+# import base64  # 🔴 Add this line
+# import requests
+# import json
+# import os
+# import traceback
+# from flask import Flask, request, jsonify
+
+# app = Flask(__name__)  # Ensure `app` is defined
+
+# # from flask import Flask, request, jsonify
+# # import requests
+# # import os
+# # import traceback
+
+# # app = Flask(__name__)  # Ensure `app` is defined
+
+# # GitHub Credentials
+# GITHUB_USERNAME = "RayIot-US"
+# GITHUB_REPO = "Cloud_CSI"
+# GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")  # Securely load from Render Cloud environment variable
+# GITHUB_FILE_PATH = "csi_data/raw_csi_data.txt"  # Save as raw text
+
+# @app.before_request
+# def log_request():
+#     """Log all incoming requests."""
+#     print(f"🔍 Received {request.method} request to {request.path}")
+
+# def upload_to_github(raw_data):
+#     """ Upload CSI data to GitHub as RAW text """
+#     try:
+#         url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPO}/contents/{GITHUB_FILE_PATH}"
+#         headers = {
+#             "Authorization": f"token {GITHUB_TOKEN}",
+#             "Accept": "application/vnd.github.v3+json"
+#         }
+
+#         print("🔍 Checking if file exists on GitHub...")
+
+#         # Get the existing file SHA (needed for updates)
+#         response = requests.get(url, headers=headers)
+#         sha = None  
+
+#         if response.status_code == 200:
+#             sha = response.json().get("sha", None)
+#             print(f"✅ File found, SHA: {sha}")
+#         elif response.status_code == 404:
+#             print("⚠️ File does not exist, creating a new one.")
+#         else:
+#             print(f"❌ Error fetching file info from GitHub: {response.text}")
+#             return response.status_code
+
+#         # Convert data to Base64 (GitHub requires it for text files)
+#         raw_data_b64 = base64.b64encode(raw_data.encode()).decode()
+
+#         # Prepare the payload
+#         payload = {
+#             "message": "Updated RAW CSI data",
+#             "content": raw_data_b64,  
+#             "sha": sha if sha else None  
+#         }
+
+#         print("📤 Uploading RAW CSI data to GitHub...")
+#         response = requests.put(url, headers=headers, json=payload)
+
+#         print(f"🔍 GitHub API Response: {response.status_code} {response.text}")
+
+#         if response.status_code in [200, 201]:
+#             print("✅ Successfully saved RAW CSI data to GitHub!")
+#             return response.status_code
+#         else:
+#             print(f"❌ Failed to save data to GitHub! Response: {response.text}")
+#             return response.status_code
+
+#     except Exception as e:
+#         print(f"🚨 Exception Occurred: {str(e)}")
+#         traceback.print_exc()
+#         return 500
+
+# @app.route("/", methods=["GET"])
+# def home():
+#     return jsonify({"status": "success", "message": "Server is running!"}), 200
+
+# @app.route("/upload", methods=["POST"])
+# def upload():
+#     try:
+#         print("✅ Received request from ESP32")
+#         raw_data = request.data.decode("utf-8")  # Read raw text
+#         if not raw_data:
+#             print("❌ No data received!")
+#             return jsonify({"status": "error", "message": "No data received"}), 400
+#         print(f"📡 Received RAW Data:\n{raw_data}")
+
+#         # Upload raw data to GitHub
+#         status = upload_to_github(raw_data)
+
+#         if status in [200, 201]:
+#             return jsonify({"status": "success", "message": "RAW CSI data saved to GitHub"}), 200
+#         else:
+#             return jsonify({"status": "error", "message": "Failed to save to GitHub"}), 500
+#     except Exception as e:
+#         print(f"🚨 Exception Occurred: {str(e)}")
+#         traceback.print_exc()
+#         return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+
+# # ✅ Fix for Gunicorn: Ensure `app` is properly defined
+# if __name__ != "__main__":
+#     application = app  # Gunicorn looks for `application`
+
+# if __name__ == "__main__":
+#     print("🚀 Flask Server is Starting...")
+#     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True, use_reloader=False)
 
 
 
