@@ -218,16 +218,16 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True, use_reloader=False)
 
 #new to run process.py automatically
-import subprocess
+# import subprocess
 
-# After successful upload
-if status in [200, 201]:
-    try:
-        subprocess.run(["python", "process_csi_cloud.py"], check=True)
-        print("✅ processor.py executed after upload.")
-    except Exception as e:
-        print("❌ Failed to run processor.py")
-        print(e)
+# # After successful upload
+# if status in [200, 201]:
+#     try:
+#         subprocess.run(["python", "process_csi_cloud.py"], check=True)
+#         print("✅ processor.py executed after upload.")
+#     except Exception as e:
+#         print("❌ Failed to run processor.py")
+#         print(e)
 
 
 #working latest
