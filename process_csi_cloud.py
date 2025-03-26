@@ -1,0 +1,117 @@
+import requests
+import base64
+import json
+import math
+import datetime
+from math import sqrt, atan2
+import os
+
+# ========== GitHub Setup ==========
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")  # Set this in Render env
+GITHUB_USER = "RayIot-US"
+GITHUB_REPO = "Cloud_CSI"
+INPUT_FILE_PATH = "csi_data/raw_csi_data.txt"
+OUTPUT_FILE_PATH = "csi_data/processed_output.txt"
+
+HEADERS = {
+    "Authorization": f"token {GITHUB_TOKEN}",
+    "Accept": "application/vnd.github.v3+json"
+}
+
+API_URL = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/contents"
+
+# ========== CSI Processing Logic ==========
+def unwrap_phase(current_phase, next_phase):
+    delta = next_phase - current_phase
+    if delta > math.pi:
+        return current_phase + delta - (2 * math.pi)
+    elif delta < -math.pi:
+        return current_phase + delta + (2 * math.pi)
+    return next_phase
+
+def phase_filter_linear_fit(phases):
+    F = 63
+    if len(phases) <= F:
+        return
+    alpha_1 = (phases[F] - phases[0]) / (2 * math.pi * F)
+    alpha_0 = sum(phases[:F]) / F
+    for i in range(len(phases)):
+        phases[i] = phases[i] - ((alpha_1 * i) + alpha_0)
+
+# ========== GitHub Functions ==========
+def get_file_from_github(filepath):
+    print(f"📥 Fetching: {filepath}")
+    url = f"{API_URL}/{filepath}"
+    res = requests.get(url, headers=HEADERS)
+    if res.status_code == 200:
+        content = base64.b64decode(res.json()["content"]).decode()
+        sha = res.json()["sha"]
+        return content, sha
+    else:
+        print(f"❌ Could not fetch file: {res.status_code}")
+        return None, None
+
+def upload_file_to_github(content_str, path, sha=None):
+    print(f"📤 Uploading to: {path}")
+    url = f"{API_URL}/{path}"
+    payload = {
+        "message": "Upload processed CSI output",
+        "content": base64.b64encode(content_str.encode()).decode(),
+        "sha": sha
+    }
+    res = requests.put(url, headers=HEADERS, json=payload)
+    if res.status_code in [200, 201]:
+        print("✅ Upload complete.")
+    else:
+        print(f"❌ Upload failed: {res.status_code}")
+        print(res.text)
+
+# ========== CSI Parsing + Processing ==========
+def process_csi(raw_text):
+    print("🧠 Processing CSI...")
+    lines = raw_text.strip().splitlines()
+    output = []
+    i = 0
+    while i < len(lines):
+        if not lines[i].startswith("Timestamp:"):
+            i += 1
+            continue
+        timestamp = lines[i].strip()
+        i += 1
+        if i >= len(lines) or not lines[i].startswith("CSI Data:"):
+            continue
+        csi_line = lines[i].replace("CSI Data:", "").strip()
+        i += 1
+
+        tokens = csi_line.split()
+        if len(tokens) % 2 != 0:
+            continue
+
+        imaginary, real = [], []
+        for j in range(0, len(tokens), 2):
+            imaginary.append(int(tokens[j]))
+            real.append(int(tokens[j+1]))
+
+        amplitudes = [sqrt(im**2 + re**2) for im, re in zip(imaginary, real)]
+        phases = [atan2(im, re) for im, re in zip(imaginary, real)]
+
+        for j in range(len(phases) - 1):
+            phases[j+1] = unwrap_phase(phases[j], phases[j+1])
+        if len(phases) >= 64:
+            phase_filter_linear_fit(phases)
+
+        ts_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        output.append(f"{timestamp} | {ts_now}")
+        output.append("Amplitude: " + ", ".join(f"{x:.2f}" for x in amplitudes))
+        output.append("Phase: " + ", ".join(f"{x:.4f}" for x in phases))
+        output.append("")
+
+    return "\n".join(output)
+
+# ========== Main ==========
+
+if __name__ == "__main__":
+    raw_text, sha = get_file_from_github(INPUT_FILE_PATH)
+    if raw_text:
+        processed = process_csi(raw_text)
+        upload_file_to_github(processed, OUTPUT_FILE_PATH)
