@@ -188,6 +188,28 @@ def upload_to_github(new_json_data):
 def home():
     return jsonify({"status": "success", "message": "Server is running!"}), 200
 
+#uncomment this working
+# @app.route("/upload", methods=["POST"])
+# def upload():
+#     try:
+#         print("✅ Received request from ESP32")
+#         raw_data = request.data.decode("utf-8")
+#         if not raw_data:
+#             print("❌ No data received!")
+#             return jsonify({"status": "error", "message": "No data received"}), 400
+#         print(f"📡 Received RAW Data:\n{raw_data}")
+
+#         status = upload_to_github(raw_data)
+
+#         if status in [200, 201]:
+#             return jsonify({"status": "success", "message": "RAW CSI data appended to GitHub"}), 200
+#         else:
+#             return jsonify({"status": "error", "message": "Failed to save to GitHub"}), 500
+#     except Exception as e:
+#         print(f"🚨 Exception Occurred: {str(e)}")
+#         traceback.print_exc()
+#         return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+
 @app.route("/upload", methods=["POST"])
 def upload():
     try:
@@ -201,6 +223,14 @@ def upload():
         status = upload_to_github(raw_data)
 
         if status in [200, 201]:
+            try:
+                import subprocess
+                subprocess.run(["python", "process_csi_cloud.py"], check=True)
+                print("✅ Ran processor.py after upload.")
+            except Exception as e:
+                print("❌ Failed to run processor.py")
+                print(e)
+
             return jsonify({"status": "success", "message": "RAW CSI data appended to GitHub"}), 200
         else:
             return jsonify({"status": "error", "message": "Failed to save to GitHub"}), 500
@@ -208,6 +238,7 @@ def upload():
         print(f"🚨 Exception Occurred: {str(e)}")
         traceback.print_exc()
         return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+
 
 # Gunicorn compatibility
 if __name__ != "__main__":
