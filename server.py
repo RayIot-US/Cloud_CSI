@@ -223,7 +223,7 @@ import subprocess
 # After successful upload
 if status in [200, 201]:
     try:
-        subprocess.run(["python", "processor.py"], check=True)
+        subprocess.run(["python", "process_csi_cloud.py"], check=True)
         print("✅ processor.py executed after upload.")
     except Exception as e:
         print("❌ Failed to run processor.py")
