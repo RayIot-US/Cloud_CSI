@@ -130,37 +130,74 @@ def get_file_from_github(filepath):
 #         print(f"❌ Upload failed: {res.status_code}")
 #         print(res.text)
 
+# def upload_file_to_github(content_str, path):
+#     print(f"📤 Uploading to: {path}")
+#     url = f"{API_URL}/{path}"
+
+#     # Get SHA if the file exists
+#     res = requests.get(url, headers=HEADERS)
+#     sha = None
+#     if res.status_code == 200:
+#         sha = res.json().get("sha")
+#         print(f"✅ Found existing file. SHA: {sha}")
+#     elif res.status_code == 404:
+#         print("📁 File does not exist. A new one will be created.")
+#     else:
+#         print(f"❌ Failed to check file. Status: {res.status_code}")
+#         return
+
+#     # Create payload
+#     payload = {
+#         "message": "Upload processed CSI output",
+#         "content": base64.b64encode(content_str.encode()).decode()
+#     }
+#     if sha:
+#         payload["sha"] = sha
+
+#     # Send PUT request
+#     put_res = requests.put(url, headers=HEADERS, json=payload)
+#     if put_res.status_code in [200, 201]:
+#         print("✅ Upload success!")
+#     else:
+#         print(f"❌ Upload failed. Status: {put_res.status_code}")
+#         print(put_res.text)
+
 def upload_file_to_github(content_str, path):
     print(f"📤 Uploading to: {path}")
     url = f"{API_URL}/{path}"
 
-    # Get SHA if the file exists
+    # Step 1: Check if file exists to get SHA
     res = requests.get(url, headers=HEADERS)
     sha = None
+
     if res.status_code == 200:
-        sha = res.json().get("sha")
-        print(f"✅ Found existing file. SHA: {sha}")
+        sha = res.json().get("sha", None)
+        print(f"✅ File exists. SHA: {sha}")
     elif res.status_code == 404:
-        print("📁 File does not exist. A new one will be created.")
+        print("📁 File not found. Creating new one.")
     else:
-        print(f"❌ Failed to check file. Status: {res.status_code}")
+        print(f"❌ Error checking file: {res.status_code}")
+        print(res.text)
         return
 
-    # Create payload
+    # Step 2: Build payload
     payload = {
         "message": "Upload processed CSI output",
         "content": base64.b64encode(content_str.encode()).decode()
     }
+
+    # ✅ Only include SHA if it’s a valid string
     if sha:
         payload["sha"] = sha
 
-    # Send PUT request
-    put_res = requests.put(url, headers=HEADERS, json=payload)
-    if put_res.status_code in [200, 201]:
-        print("✅ Upload success!")
+    # Step 3: Upload file
+    put = requests.put(url, headers=HEADERS, json=payload)
+
+    if put.status_code in [200, 201]:
+        print("✅ Upload successful.")
     else:
-        print(f"❌ Upload failed. Status: {put_res.status_code}")
-        print(put_res.text)
+        print(f"❌ Upload failed: {put.status_code}")
+        print(put.text)
 
 
 # ========== CSI Parsing + Processing ==========
@@ -211,4 +248,5 @@ if __name__ == "__main__":
     raw_text, sha = get_file_from_github(INPUT_FILE_PATH)
     if raw_text:
         processed = process_csi(raw_text)
-        upload_file_to_github(processed, OUTPUT_FILE_PATH)
+       # upload_file_to_github(processed, OUTPUT_FILE_PATH)
+        upload_file_to_github(processed_data, "csi_data/processed_output.txt")
