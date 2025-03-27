@@ -113,22 +113,54 @@ def get_file_from_github(filepath):
 #         print(f"❌ Upload failed: {res.status_code}")
 #         print(res.text)
 
+# def upload_file_to_github(content_str, path):
+#     print(f"📤 Uploading new file to: {path}")
+#     url = f"{API_URL}/{path}"
+
+#     payload = {
+#         "message": "Create new processed CSI file",
+#         "content": base64.b64encode(content_str.encode()).decode()
+#     }
+
+#     res = requests.put(url, headers=HEADERS, json=payload)
+
+#     if res.status_code in [200, 201]:
+#         print("✅ Upload complete.")
+#     else:
+#         print(f"❌ Upload failed: {res.status_code}")
+#         print(res.text)
+
 def upload_file_to_github(content_str, path):
-    print(f"📤 Uploading new file to: {path}")
+    print(f"📤 Uploading to: {path}")
     url = f"{API_URL}/{path}"
 
+    # Get SHA if the file exists
+    res = requests.get(url, headers=HEADERS)
+    sha = None
+    if res.status_code == 200:
+        sha = res.json().get("sha")
+        print(f"✅ Found existing file. SHA: {sha}")
+    elif res.status_code == 404:
+        print("📁 File does not exist. A new one will be created.")
+    else:
+        print(f"❌ Failed to check file. Status: {res.status_code}")
+        return
+
+    # Create payload
     payload = {
-        "message": "Create new processed CSI file",
+        "message": "Upload processed CSI output",
         "content": base64.b64encode(content_str.encode()).decode()
     }
+    if sha:
+        payload["sha"] = sha
 
-    res = requests.put(url, headers=HEADERS, json=payload)
-
-    if res.status_code in [200, 201]:
-        print("✅ Upload complete.")
+    # Send PUT request
+    put_res = requests.put(url, headers=HEADERS, json=payload)
+    if put_res.status_code in [200, 201]:
+        print("✅ Upload success!")
     else:
-        print(f"❌ Upload failed: {res.status_code}")
-        print(res.text)
+        print(f"❌ Upload failed. Status: {put_res.status_code}")
+        print(put_res.text)
 
 
 # ========== CSI Parsing + Processing ==========
