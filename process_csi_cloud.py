@@ -51,20 +51,41 @@ def get_file_from_github(filepath):
         print(f"❌ Could not fetch file: {res.status_code}")
         return None, None
 
+# def upload_file_to_github(content_str, path, sha=None):
+#     print(f"📤 Uploading to: {path}")
+#     url = f"{API_URL}/{path}"
+#     payload = {
+#         "message": "Upload processed CSI output",
+#         "content": base64.b64encode(content_str.encode()).decode(),
+#         "sha": sha
+#     }
+#     res = requests.put(url, headers=HEADERS, json=payload)
+#     if res.status_code in [200, 201]:
+#         print("✅ Upload complete.")
+#     else:
+#         print(f"❌ Upload failed: {res.status_code}")
+#         print(res.text)
+
 def upload_file_to_github(content_str, path, sha=None):
     print(f"📤 Uploading to: {path}")
     url = f"{API_URL}/{path}"
+
     payload = {
         "message": "Upload processed CSI output",
-        "content": base64.b64encode(content_str.encode()).decode(),
-        "sha": sha
+        "content": base64.b64encode(content_str.encode()).decode()
     }
+
+    if sha:
+        payload["sha"] = sha  # Only add if it exists
+
     res = requests.put(url, headers=HEADERS, json=payload)
+
     if res.status_code in [200, 201]:
         print("✅ Upload complete.")
     else:
         print(f"❌ Upload failed: {res.status_code}")
         print(res.text)
+
 
 # ========== CSI Parsing + Processing ==========
 def process_csi(raw_text):
