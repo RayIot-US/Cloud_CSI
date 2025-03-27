@@ -139,7 +139,10 @@ def upload_to_github(new_json_data):
         existing_data = ""
 
         if response.status_code == 200:
-            sha = response.json()["sha"]
+           # sha = response.json()["sha"]
+            sha = response.json().get("sha", None)
+            print(f"🔍 SHA fetched from GitHub: {sha}")
+
             existing_base64 = response.json()["content"]
             existing_data = base64.b64decode(existing_base64).decode("utf-8")
             print(f"✅ Existing file found. Appending...")
