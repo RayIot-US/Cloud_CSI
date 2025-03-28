@@ -162,8 +162,8 @@ def upload_to_github(new_json_data):
             timestamp = entry.get("timestamp", "unknown")
             values = entry.get("csi_values", [])
             values_str = " ".join(map(str, values))
-            #new_text += f"Timestamp: {timestamp}\nCSI Data: {values_str}\n\n"
-            new_text += f"{timestamp}\nCSI Data: {values_str}\n\n"
+            new_text += f"Timestamp: {timestamp}\nCSI Data: {values_str}\n\n"
+            #new_text += f"{timestamp}\nCSI Data: {values_str}\n\n"
 
         # Append to existing data
         combined_data = existing_data.strip() + "\n" + new_text.strip()
