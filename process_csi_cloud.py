@@ -290,4 +290,6 @@ if __name__ == "__main__":
     if raw_text:
         processed = process_csi(raw_text)
        # upload_file_to_github(processed, OUTPUT_FILE_PATH)
-        upload_file_to_github(processed_data, "csi_data/processed_output.txt")
+       # upload_file_to_github(processed_data, "csi_data/processed_output.txt")
+        upload_file_to_github(processed, "csi_data/processed_output.txt")
+
