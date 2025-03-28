@@ -273,7 +273,9 @@ def process_csi(raw_text):
         if len(phases) >= 64:
             phase_filter_linear_fit(phases)
 
-        ts_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        #ts_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        ts_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+
         output.append(f"{timestamp} | {ts_now}")
         output.append("Amplitude: " + ", ".join(f"{x:.2f}" for x in amplitudes))
         output.append("Phase: " + ", ".join(f"{x:.4f}" for x in phases))
