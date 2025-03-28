@@ -233,8 +233,9 @@ def upload():
             except Exception as e:
                 print("❌ Failed to run processor.py")
                 print(e)
+                print("STDERR:", e.stderr)
 
-        print("STDERR:", e.stderr)
+        
 
 
             return jsonify({"status": "success", "message": "RAW CSI data appended to GitHub"}), 200
