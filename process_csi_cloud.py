@@ -277,20 +277,20 @@ def process_csi(raw_text):
         #ts_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         ts_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
-        timestamp = lines[i].strip().replace("Timestamp:", "").strip() 
-        i += 1
+        # timestamp = lines[i].strip().replace("Timestamp:", "").strip() 
+        # i += 1
 
-        output.append(f"{timestamp}")
-        output.append("Amplitude: " + ", ".join(f"{x:.2f}" for x in amplitudes))
-        output.append("Phase: " + ", ".join(f"{x:.4f}" for x in phases))
-        output.append("")
-
-        #output.append(f"{timestamp} | {ts_now}")
         # output.append(f"{timestamp}")
-
         # output.append("Amplitude: " + ", ".join(f"{x:.2f}" for x in amplitudes))
         # output.append("Phase: " + ", ".join(f"{x:.4f}" for x in phases))
         # output.append("")
+
+        output.append(f"{timestamp} | {ts_now}")
+        output.append(f"{timestamp}")
+
+        output.append("Amplitude: " + ", ".join(f"{x:.2f}" for x in amplitudes))
+        output.append("Phase: " + ", ".join(f"{x:.4f}" for x in phases))
+        output.append("")
 
     return "\n".join(output)
 
