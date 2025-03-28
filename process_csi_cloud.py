@@ -286,6 +286,10 @@ def process_csi(raw_text):
         # output.append("")
 
         #output.append(f"{timestamp} | {ts_now}")
+        timestamp_line = lines[i].strip()
+        timestamp = timestamp_line.split(":", 1)[1].strip() if "Timestamp:" in timestamp_line else ""
+        i += 1
+
         output.append(f"{timestamp}")
 
         output.append("Amplitude: " + ", ".join(f"{x:.2f}" for x in amplitudes))
