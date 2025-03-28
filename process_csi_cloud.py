@@ -280,21 +280,21 @@ def process_csi(raw_text):
         # timestamp = lines[i].strip().replace("Timestamp:", "").strip() 
         # i += 1
 
+        output.append(f"{timestamp}")
+        output.append("Amplitude: " + ", ".join(f"{x:.4f}" for x in amplitudes))
+        output.append("Phase: " + ", ".join(f"{x:.4f}" for x in phases))
+        output.append("")
+
+        #output.append(f"{timestamp} | {ts_now}")
+        # timestamp_line = lines[i].strip()
+        # timestamp = timestamp_line.split(":", 1)[1].strip() if "Timestamp:" in timestamp_line else ""
+        # i += 1
+
         # output.append(f"{timestamp}")
+
         # output.append("Amplitude: " + ", ".join(f"{x:.2f}" for x in amplitudes))
         # output.append("Phase: " + ", ".join(f"{x:.4f}" for x in phases))
         # output.append("")
-
-        #output.append(f"{timestamp} | {ts_now}")
-        timestamp_line = lines[i].strip()
-        timestamp = timestamp_line.split(":", 1)[1].strip() if "Timestamp:" in timestamp_line else ""
-        i += 1
-
-        output.append(f"{timestamp}")
-
-        output.append("Amplitude: " + ", ".join(f"{x:.2f}" for x in amplitudes))
-        output.append("Phase: " + ", ".join(f"{x:.4f}" for x in phases))
-        output.append("")
 
     return "\n".join(output)
 
