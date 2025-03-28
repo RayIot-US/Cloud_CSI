@@ -225,14 +225,31 @@ def upload():
 
         status = upload_to_github(raw_data)
 
-        if status in [200, 201]:
-            try:
-                import subprocess
-                subprocess.run(["python3", "process_csi_cloud.py"], check=True)
-                print("✅ Ran processor.py after upload.")
-            except Exception as e:
-                print("❌ Failed to run processor.py")
-                print(e)
+        # if status in [200, 201]:
+        #     try:
+        #         import subprocess
+        #         subprocess.run(["python3", "process_csi_cloud.py"], check=True)
+        #         print("✅ Ran processor.py after upload.")
+        #     except Exception as e:
+        #         print("❌ Failed to run processor.py")
+        #         print(e)
+            import os
+import subprocess
+
+...
+
+if status in [200, 201]:
+    try:
+        script_path = os.path.join(os.path.dirname(__file__), "process_csi_cloud.py")
+        result = subprocess.run(["python3", script_path], check=True, capture_output=True, text=True)
+        print("✅ Ran process_csi_cloud.py")
+        print(result.stdout)
+        print(result.stderr)
+    except subprocess.CalledProcessError as e:
+        print("❌ process_csi_cloud.py failed:")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+
 
             return jsonify({"status": "success", "message": "RAW CSI data appended to GitHub"}), 200
         else:
