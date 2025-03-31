@@ -13,7 +13,11 @@ import os
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")  # Set this in Render env
 GITHUB_USER = "RayIot-US"
 GITHUB_REPO = "Cloud_CSI"
-INPUT_FILE_PATH = "csi_data/raw_csi_data.txt"
+#INPUT_FILE_PATH = "csi_data/raw_csi_data.txt"
+#from datetime import datetime
+today = datetime.now().strftime("%Y%m%d")
+INPUT_FILE_PATH = f"csi_data/processed_output_{today}.txt"
+
 #OUTPUT_FILE_PATH = "csi_data/processed_output.txt"
 
 now = datetime.now().strftime("%Y%m%d_%H%M%S")
