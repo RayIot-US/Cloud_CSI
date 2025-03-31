@@ -236,12 +236,19 @@ def upload():
                 subprocess.run(["python3", "format_csi_output.py"], check=True)
                 print("✅ Ran format_csi_output.py")
                 
-            except Exception as e:
-                print("❌ Failed to run processor.py")
-                print(e)
+            # except Exception as e:
+            #     print("❌ Failed to run processor.py")
+            #     print(e)
+            #     print("STDERR:", e.stderr)
+
+            except subprocess.CalledProcessError as e:
+                print("❌ Subprocess failed.")
+                print("STDOUT:", e.stdout)
                 print("STDERR:", e.stderr)
 
-        
+            except Exception as e:
+                print("❌ General error running subprocesses.")
+                print(str(e))
 
 
             return jsonify({"status": "success", "message": "RAW CSI data appended to GitHub"}), 200
