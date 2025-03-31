@@ -231,6 +231,11 @@ def upload():
                 import subprocess
                 subprocess.run(["python3", "process_csi_cloud.py"], check=True)
                 print("✅ Ran processor.py after upload.")
+
+             # Run the second formatting stage
+                subprocess.run(["python3", "format_csi_output.py"], check=True)
+                print("✅ Ran format_csi_output.py")
+                
             except Exception as e:
                 print("❌ Failed to run processor.py")
                 print(e)
