@@ -284,7 +284,9 @@ def process_csi(raw_text):
         #output.append("Amplitude: " + ", ".join(f"{x:.4f}" for x in amplitudes))
         output.append("Amplitude: " + ", ".join(str(x) for x in amplitudes))
 
-        output.append("Phase: " + ", ".join(f"{x:.4f}" for x in phases))
+        #output.append("Phase: " + ", ".join(f"{x:.4f}" for x in phases))
+        output.append("Phase: " + ", ".join(str(x) for x in phases))
+
         output.append("")
 
         #output.append(f"{timestamp} | {ts_now}")
