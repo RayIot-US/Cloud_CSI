@@ -18,18 +18,47 @@ HEADERS = {
 
 # ========= GitHub Functions =========
 
+# def get_file(filepath):
+#     url = f"{API_URL}/{filepath}"
+#     print(f"📥 Downloading: {filepath}")
+#     res = requests.get(url, headers=HEADERS)
+#     if res.status_code == 200:
+#         content = base64.b64decode(res.json()["content"]).decode()
+#         sha = res.json().get("sha")
+#         return content, sha
+#     else:
+#         print(f"❌ Failed to fetch file. Status: {res.status_code}")
+#         print(res.text)
+#         return None, None
+
 def get_file(filepath):
     url = f"{API_URL}/{filepath}"
     print(f"📥 Downloading: {filepath}")
     res = requests.get(url, headers=HEADERS)
     if res.status_code == 200:
-        content = base64.b64decode(res.json()["content"]).decode()
-        sha = res.json().get("sha")
-        return content, sha
+        json_data = res.json()
+        try:
+            # Try normal content decoding
+            content = base64.b64decode(json_data["content"]).decode()
+        except KeyError:
+            # Fallback: GitHub doesn’t include content if the file is too large
+            download_url = json_data.get("download_url")
+            if not download_url:
+                print("❌ No content or download_url found.")
+                return None, None
+            print("📡 Fetching large file from download_url...")
+            download_res = requests.get(download_url)
+            if download_res.status_code == 200:
+                return download_res.text, json_data.get("sha")
+            else:
+                print("❌ Failed to fetch from download_url.")
+                return None, None
+        return content, json_data.get("sha")
     else:
         print(f"❌ Failed to fetch file. Status: {res.status_code}")
         print(res.text)
         return None, None
+
 
 def upload_file(content_str, path):
     print(f"📤 Uploading to: {path}")
