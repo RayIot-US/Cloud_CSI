@@ -86,12 +86,22 @@ def format_blocks(text):
 
 # ========= Main ==========
 
+# if __name__ == "__main__":
+#     text, _ = get_file(INPUT_FILE_PATH)
+#     if text:
+#         formatted_data = format_blocks(text)
+#         upload_file(formatted_data, OUTPUT_FILE_PATH)
+
 if __name__ == "__main__":
+    print("🚀 format_csi_output.py is running...")
     text, _ = get_file(INPUT_FILE_PATH)
     if text:
+        print("✅ File fetched. Starting formatting...")
         formatted_data = format_blocks(text)
+        print("✅ Formatting complete. Sending to upload_file()...")
         upload_file(formatted_data, OUTPUT_FILE_PATH)
-
+    else:
+        print("❌ No input file content found.")
 
 
 # import requests
