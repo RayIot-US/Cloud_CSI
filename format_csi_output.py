@@ -7,7 +7,11 @@ import re
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_USER = "RayIot-US"
 GITHUB_REPO = "Cloud_CSI"
-INPUT_FILE_PATH = "csi_data/processed_output.txt"
+#INPUT_FILE_PATH = "csi_data/processed_output.txt"
+from datetime import datetime
+today = datetime.now().strftime("%Y%m%d")
+INPUT_FILE_PATH = f"csi_data/processed_output_{today}.txt"
+
 OUTPUT_FILE_PATH = "csi_data/formatted_output.csv"
 API_URL = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/contents"
 
