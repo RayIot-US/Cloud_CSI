@@ -67,8 +67,9 @@ def upload_file(content_str, path):
 # ========= Formatter Logic =========
 
 def format_blocks(text):
-    pattern = re.compile(r"^(.*?)\nTimestamp: r^(.*?)\nAmplitude: (.*?)\nPhase: (.*?)(?=\n\S|\Z)", re.DOTALL | re.MULTILINE)
+    #pattern = re.compile(r"^(.*?)\nTimestamp: r^(.*?)\nAmplitude: (.*?)\nPhase: (.*?)(?=\n\S|\Z)", re.DOTALL | re.MULTILINE)
     #pattern = re.compile(r"^(.*?)\nAmplitude: (.*?)\nPhase: (.*?)(?=\n\S|\Z)", re.DOTALL | re.MULTILINE)
+    pattern = re.compile(r"^Timestamp:\s*(.*?)\nAmplitude: (.*?)\nPhase: (.*?)(?=\n\S|\Z)", re.DOTALL | re.MULTILINE)
 
     #pattern = re.compile(r"Timestamp: (.*?)\nAmplitude: (.*?)\nPhase: (.*?)(?=\nTimestamp:|\Z)", re.DOTALL)
 
