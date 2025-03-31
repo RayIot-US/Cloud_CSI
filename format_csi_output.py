@@ -30,6 +30,37 @@ def get_file(filepath):
         print(f"❌ Failed to fetch file. Status: {res.status_code}")
         return None, None
 
+# def upload_file(content_str, path):
+#     print(f"📤 Uploading to: {path}")
+#     url = f"{API_URL}/{path}"
+
+#     # Check if file exists to get SHA
+#     sha = None
+#     check = requests.get(url, headers=HEADERS)
+#     if check.status_code == 200:
+#         sha = check.json().get("sha")
+
+#     payload = {
+#         "message": "Updated formatted CSI output",
+#         "content": base64.b64encode(content_str.encode()).decode()
+#     }
+
+#     if sha:
+#         payload["sha"] = sha
+
+
+#     else:
+#         print("📁 File not found — will create a new one.")
+
+
+#     res = requests.put(url, headers=HEADERS, json=payload)
+#     print(f"🔁 GitHub Response: {res.status_code}")
+#     if res.status_code in [200, 201]:
+#         print("✅ Upload successful.")
+#     else:
+#         print("❌ Upload failed.")
+#         print(res.text)
+
 def upload_file(content_str, path):
     print(f"📤 Uploading to: {path}")
     url = f"{API_URL}/{path}"
@@ -39,10 +70,17 @@ def upload_file(content_str, path):
     check = requests.get(url, headers=HEADERS)
     if check.status_code == 200:
         sha = check.json().get("sha")
+        print(f"✅ Existing file SHA: {sha}")
+    elif check.status_code == 404:
+        print("📁 File does not exist. Creating new.")
+    else:
+        print(f"❌ Error checking file: {check.status_code}")
+        print(check.text)
+        return
 
     payload = {
         "message": "Updated formatted CSI output",
-        "content": base64.b64encode(content_str.encode()).decode()
+        "content": base64.b64encode(content_str.encode("utf-8")).decode("utf-8")
     }
 
     if sha:
@@ -55,6 +93,7 @@ def upload_file(content_str, path):
     else:
         print("❌ Upload failed.")
         print(res.text)
+
 
 # ========= Formatter Logic =========
 
