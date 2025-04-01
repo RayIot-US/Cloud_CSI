@@ -233,7 +233,7 @@ def upload():
                 print("✅ Ran processor.py after upload.")
 
                 import time
-                time.sleep(2)  # <-- Add this to wait for upload to GitHub
+                time.sleep(4)  # <-- Add this to wait for upload to GitHub
 
              # Run the second formatting stage
                 subprocess.run(["python3", "format_csi_output.py"], check=True)
