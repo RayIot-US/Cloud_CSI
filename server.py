@@ -238,7 +238,7 @@ def upload():
 
                             # Run the second formatting stage
                 subprocess.run(["python3", "rar.py"], check=True)
-                print("✅ Ran format_csi_output.py")
+                print("✅ Ran rar.py")
              # Run the second formatting stage - working
                 # subprocess.run(["python3", "format_csi_output.py"], check=True)
                 # print("✅ Ran format_csi_output.py")
