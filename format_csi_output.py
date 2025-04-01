@@ -125,16 +125,16 @@ def format_blocks(text):
 #         formatted_data = format_blocks(text)
 #         upload_file(formatted_data, OUTPUT_FILE_PATH)
 #working
-if __name__ == "__main__":
-    print("🚀 format_csi_output.py is running...")
-    text, _ = get_file(INPUT_FILE_PATH)
-    if text:
-        print("✅ File fetched. Starting formatting...")
-        formatted_data = format_blocks(text)
-        print("✅ Formatting complete. Sending to upload_file()...")
-        upload_file(formatted_data, OUTPUT_FILE_PATH)
-    else:
-        print("❌ No input file content found.")
+# if __name__ == "__main__":
+#     print("🚀 format_csi_output.py is running...")
+#     text, _ = get_file(INPUT_FILE_PATH)
+#     if text:
+#         print("✅ File fetched. Starting formatting...")
+#         formatted_data = format_blocks(text)
+#         print("✅ Formatting complete. Sending to upload_file()...")
+#         upload_file(formatted_data, OUTPUT_FILE_PATH)
+#     else:
+#         print("❌ No input file content found.")
 
 # import time
 
@@ -162,6 +162,33 @@ if __name__ == "__main__":
 #         formatted_data = format_blocks(text)
 #         print("✅ Formatting complete. Sending to upload_file()...")
 #         upload_file(formatted_data, OUTPUT_FILE_PATH)
+
+import time
+
+if __name__ == "__main__":
+    print("🚀 format_csi_output.py is running...")
+
+    max_attempts = 10
+    attempt = 1
+    text = None
+
+    while attempt <= max_attempts:
+        print(f"⏳ Attempt {attempt} to fetch processed_output.txt")
+        text, _ = get_file(INPUT_FILE_PATH)
+        if text:
+            print("✅ File fetched. Starting formatting...")
+            break
+        else:
+            print("⚠️ File not ready yet. Retrying in 4 seconds...")
+            time.sleep(4)
+            attempt += 1
+
+    if not text:
+        print("❌ No input file content found after retries.")
+    else:
+        formatted_data = format_blocks(text)
+        print("✅ Formatting complete. Sending to upload_file()...")
+        upload_file(formatted_data, OUTPUT_FILE_PATH)
 
 
 # import requests
