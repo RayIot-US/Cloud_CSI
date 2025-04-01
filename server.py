@@ -235,6 +235,10 @@ def upload():
                 import time
                 time.sleep(4)  # <-- Add this to wait for upload to GitHub
 
+
+                            # Run the second formatting stage
+                subprocess.run(["python3", "rar.py"], check=True)
+                print("✅ Ran format_csi_output.py")
              # Run the second formatting stage - working
                 # subprocess.run(["python3", "format_csi_output.py"], check=True)
                 # print("✅ Ran format_csi_output.py")
