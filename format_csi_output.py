@@ -141,7 +141,7 @@ import time
 if __name__ == "__main__":
     print("🚀 format_csi_output.py is running...")
 
-    max_attempts = 5
+    max_attempts = 10
     attempt = 1
     text = None
 
@@ -153,7 +153,7 @@ if __name__ == "__main__":
             break
         else:
             print("⚠️ File not ready yet. Retrying in 2 seconds...")
-            time.sleep(2)
+            time.sleep(4)
             attempt += 1
 
     if not text:
