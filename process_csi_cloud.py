@@ -20,8 +20,10 @@ INPUT_FILE_PATH = "csi_data/raw_csi_data.txt"
 
 #OUTPUT_FILE_PATH = "csi_data/processed_output.txt"
 
-now = datetime.now().strftime("%Y%m%d_%H%M%S")
-OUTPUT_FILE_PATH = f"csi_data/processed_output_{now}.txt"
+# now = datetime.now().strftime("%Y%m%d_%H%M%S")
+# OUTPUT_FILE_PATH = f"csi_data/processed_output_{now}.txt"
+OUTPUT_FILE_PATH = "csi_data/processed_output.txt"
+
 
 
 HEADERS = {
