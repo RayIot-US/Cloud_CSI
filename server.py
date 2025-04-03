@@ -245,8 +245,8 @@ def upload():
 
                 # subprocess.run(["python3", "n2_cloud.py"], check=True)
                 # print("✅ Ran n2_cloud.py")
-            subprocess.run(["python3", "structure.py"], check=True)
-            print("✅ Ran structure.py")
+                subprocess.run(["python3", "structure.py"], check=True)
+                print("✅ Ran structure.py")
 
 
 
