@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import base64
 import os
+from io import StringIO
 from scipy.signal import butter, filtfilt
 
 # === GitHub Setup ===
@@ -76,7 +77,8 @@ def main():
         print("❌ Failed to fetch input.")
         return
 
-    df = pd.read_csv(pd.compat.StringIO(raw_csv))
+    df = pd.read_csv(StringIO(raw_csv))
+    #df = pd.read_csv(pd.compat.StringIO(raw_csv))
     amp_data = df.drop(columns=["Timestamp"]).values
     filtered_data = apply_bandpass_filter(amp_data, lowcut, highcut, sampling_rate)
 
