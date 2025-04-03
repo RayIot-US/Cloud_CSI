@@ -248,6 +248,10 @@ def upload():
                 subprocess.run(["python3", "structure.py"], check=True)
                 print("✅ Ran structure.py")
 
+                subprocess.run(["python3", "bandpass_filter.py"], check=True)
+                print("✅ Ran bandpass_filter.py")
+
+
 
 
             # except Exception as e:
