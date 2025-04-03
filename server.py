@@ -247,9 +247,11 @@ def upload():
                 # print("✅ Ran n2_cloud.py")
                 subprocess.run(["python3", "structure.py"], check=True)
                 print("✅ Ran structure.py")
+                time.sleep(2)
 
                 subprocess.run(["python3", "bandpass_filter.py"], check=True)
                 print("✅ Ran bandpass_filter.py")
+                time.sleep(2)
 
 
 
